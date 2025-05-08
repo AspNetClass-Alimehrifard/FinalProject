@@ -5,6 +5,7 @@ using FinalProject.WebApi.Models.DomainModel.OrderAggregates;
 using FinalProject.WebApi.Models.Services.Contracts;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
+
 namespace FinalProject.WebApi.Models.Services.Repositories
 {
     public class OrderRepository : IOrderRepository
@@ -28,7 +29,6 @@ namespace FinalProject.WebApi.Models.Services.Repositories
                 {
                     return new Response<IEnumerable<OrderHeader>>(false, HttpStatusCode.UnprocessableContent, ResponseMessages.NullInput, null);
                 }
-                await _context.OrderHeaders.AsNoTracking().ToListAsync();
                 return new Response<IEnumerable<OrderHeader>>(true, HttpStatusCode.OK, ResponseMessages.SuccessfulOperation, orders);
             }
             catch (Exception)
@@ -66,7 +66,7 @@ namespace FinalProject.WebApi.Models.Services.Repositories
         {
             try
             {
-                if (obj == null)
+                if (obj is null)
                 {
                     return new Response<OrderHeader>(false, HttpStatusCode.UnprocessableContent, ResponseMessages.NullInput, null);
                 }
@@ -90,7 +90,7 @@ namespace FinalProject.WebApi.Models.Services.Repositories
 
                 if (obj.OrderDetails == null || !obj.OrderDetails.Any())
                 {
-                    return new Response<OrderHeader>(false, HttpStatusCode.BadRequest, "OrderDetails is required and must contain valid items.", null);
+                    return new Response<OrderHeader>(false, HttpStatusCode.UnprocessableContent, "OrderDetails is required and must contain valid items.", null);
                 }
 
                 foreach (var detail in obj.OrderDetails)
@@ -98,14 +98,15 @@ namespace FinalProject.WebApi.Models.Services.Repositories
                     detail.OrderHeaderId = obj.Id;
                 }
 
-                _context.OrderHeaders.Add(obj);
+                await _context.OrderHeaders.AddAsync(obj);
                 await _context.SaveChangesAsync();
 
                 return new Response<OrderHeader>(true, HttpStatusCode.OK, ResponseMessages.SuccessfulOperation, obj);
+
             }
             catch (Exception ex)
             {
-                return new Response<OrderHeader>(false, HttpStatusCode.InternalServerError, ex.Message, null);
+                return new Response<OrderHeader>(false, HttpStatusCode.UnprocessableContent, ex.Message, null);
             }
         }
         #endregion

@@ -1,5 +1,4 @@
-﻿
-namespace FinalProject.WebApi.ApplicationServices.Dtos.OrderDtos.OrderDetailDtos
+﻿namespace FinalProject.WebApi.ApplicationServices.Dtos.OrderDtos.OrderDetailDtos
 {
     public class GetOrderHeaderServiceDto
     {
